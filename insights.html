@@ -1,0 +1,430 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Painel de Insights</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="config.js" onerror="window.APP_CONFIG=window.APP_CONFIG||{}"></script>
+<style>
+/* Painel de Insights — área administrativa independente da experiência pública */
+:root{
+  --viva:#9CAA39;--viva-deep:#6E7A1F;--argamassa:#E3D9AC;--urbano:#3E162F;--aco:#283145;--tijolo:#E9B349;--solo:#9D491F;
+  --paper:#F4F0E6;--card:#FFFDF8;--ink:#1F2433;--ink-2:#4A4E5C;--muted:#7A7C85;--line:#DDD6C3;--line-2:#ECE6D6;
+  --s1:#3B5BA0;--s2:#C98A12;--s3:#9D491F; /* séries validadas (CVD) */
+  --r:22px;--shadow:0 1px 2px rgba(31,36,51,.05),0 10px 30px -16px rgba(31,36,51,.22);
+  --f:"Outfit",ui-sans-serif,system-ui,sans-serif;--mono:"DM Mono",ui-monospace,Menlo,monospace;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--f);-webkit-font-smoothing:antialiased;overflow-x:hidden}
+button,input{font:inherit;color:inherit}
+h1,h2,h3{margin:0;letter-spacing:-.02em;font-weight:600}
+.wrap{max-width:1240px;margin:0 auto;padding:0 clamp(16px,3vw,32px)}
+.mono{font-family:var(--mono);font-size:.7rem;letter-spacing:.08em;text-transform:uppercase}
+header.top{background:var(--aco);color:var(--argamassa)}
+header.top .wrap{display:flex;align-items:center;gap:16px;min-height:72px;flex-wrap:wrap;padding-top:10px;padding-bottom:10px}
+header.top h1{font-size:1.35rem;color:#fff}
+header.top .sub{opacity:.75;font-size:.85rem}
+.badge{font-family:var(--mono);font-size:.66rem;letter-spacing:.08em;text-transform:uppercase;padding:6px 10px;border-radius:999px;white-space:nowrap}
+.badge.demo{background:var(--tijolo);color:var(--aco)}
+.badge.local{background:#E6EBC6;color:#4a5414}
+.badge.live{background:var(--viva);color:#fff}
+.spacer{flex:1}
+.hbtn{min-height:40px;padding:0 16px;border-radius:999px;border:1px solid rgba(227,217,172,.4);background:transparent;color:var(--argamassa);cursor:pointer}
+.hbtn:hover{background:rgba(227,217,172,.1)}
+.banner{margin:20px 0 0;padding:14px 18px;border-radius:16px;background:#F8E6BC;color:#5f430a;font-size:.92rem;display:flex;gap:12px;align-items:flex-start}
+.banner b{color:#3d2b05}
+.controls{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:22px 0 18px}
+.seg{display:inline-flex;background:var(--card);border:1px solid var(--line);border-radius:999px;padding:4px;flex-wrap:wrap}
+.seg button{border:0;background:none;padding:8px 14px;border-radius:999px;cursor:pointer;font-size:.88rem;color:var(--ink-2)}
+.seg button[aria-pressed="true"]{background:var(--aco);color:var(--argamassa)}
+.btn{min-height:42px;padding:0 18px;border-radius:999px;border:1.5px solid var(--line);background:var(--card);cursor:pointer;font-weight:500;display:inline-flex;align-items:center;gap:8px}
+.btn:hover{border-color:var(--ink)}
+.btn.primary{background:var(--aco);color:var(--argamassa);border-color:var(--aco)}
+.grid{display:grid;gap:14px}
+.kpis{grid-template-columns:repeat(4,1fr)}
+.kpi{background:var(--card);border-radius:var(--r);padding:18px 20px;box-shadow:var(--shadow);display:grid;gap:6px}
+.kpi .l{font-size:.86rem;color:var(--ink-2)}
+.kpi .v{font-size:2.1rem;font-weight:700;letter-spacing:-.03em;font-variant-numeric:tabular-nums;line-height:1.05}
+.kpi .d{font-family:var(--mono);font-size:.7rem;color:var(--muted)}
+.kpi .d.up{color:var(--viva-deep)} .kpi .d.down{color:var(--solo)}
+.kpi.hl{background:var(--aco);color:var(--argamassa)} .kpi.hl .l{color:rgba(227,217,172,.85)} .kpi.hl .v{color:#fff} .kpi.hl .d{color:rgba(227,217,172,.7)}
+.card{background:var(--card);border-radius:var(--r);padding:clamp(18px,2.4vw,26px);box-shadow:var(--shadow);min-width:0}
+.card h2{font-size:1.15rem;margin-bottom:4px}
+.card .desc{font-size:.86rem;color:var(--muted);margin:0 0 16px}
+.two{grid-template-columns:1.4fr 1fr}
+.half{grid-template-columns:1fr 1fr}
+.section{margin-top:14px}
+/* barras horizontais */
+.hbars{display:grid;gap:10px}
+.hbar{display:grid;grid-template-columns:minmax(120px,220px) 1fr auto;gap:12px;align-items:center;font-size:.9rem;position:relative}
+.hbar .t{height:22px;background:var(--line-2);border-radius:6px;overflow:hidden;position:relative}
+.hbar .t span{position:absolute;left:0;top:0;bottom:0;border-radius:4px;background:var(--aco);transition:width .8s cubic-bezier(.2,.8,.2,1)}
+.hbar .n{font-variant-numeric:tabular-nums;font-weight:600;min-width:92px;text-align:right}
+.hbar .n small{font-weight:400;color:var(--muted);margin-left:6px}
+.hbar.drop .t{outline:2px dashed var(--solo);outline-offset:2px}
+.hbar[data-tip]:hover .t span{filter:brightness(1.15)}
+.funnel>.hbars>.hbar{grid-template-columns:24px minmax(140px,240px) 1fr auto}
+.funnel .idx{font-family:var(--mono);font-size:.7rem;color:var(--muted)}
+.funnel .conv{font-family:var(--mono);font-size:.66rem;color:var(--muted);display:block;font-weight:400}
+.drop-note{margin-top:14px;padding:12px 14px;border-radius:14px;background:#F1DCCF;color:#6b2e10;font-size:.9rem}
+.legend{display:flex;flex-wrap:wrap;gap:14px;font-size:.84rem;color:var(--ink-2);margin-bottom:8px}
+.legend i{display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:6px;vertical-align:-1px}
+.chart{position:relative}
+.chart svg{width:100%;height:auto;display:block;overflow:visible}
+.tip{position:absolute;pointer-events:none;background:var(--ink);color:var(--paper);padding:8px 10px;border-radius:10px;font-size:.8rem;white-space:nowrap;transform:translate(-50%,-110%);opacity:0;transition:opacity .15s;z-index:5}
+.tip b{font-weight:600}
+.stack{display:flex;height:44px;border-radius:10px;overflow:hidden;gap:2px;background:var(--card)}
+.stack div{display:flex;align-items:center;justify-content:center;font-size:.8rem;font-weight:600;min-width:0;overflow:hidden;white-space:nowrap}
+.stars-row{display:flex;align-items:baseline;gap:12px;margin-bottom:14px}
+.stars-row .big{font-size:3rem;font-weight:700;letter-spacing:-.04em}
+.comments{display:grid;gap:10px;max-height:340px;overflow:auto;padding-right:4px}
+.comments div{background:var(--paper);border-radius:14px;padding:12px 14px;font-size:.9rem}
+.comments small{display:block;font-family:var(--mono);font-size:.64rem;color:var(--muted);margin-bottom:4px}
+.empty{color:var(--muted);font-size:.9rem;padding:16px 0}
+table{width:100%;border-collapse:collapse;font-size:.84rem}
+th,td{text-align:right;padding:6px 8px;border-bottom:1px solid var(--line-2);font-variant-numeric:tabular-nums}
+th:first-child,td:first-child{text-align:left}
+details summary{cursor:pointer;font-size:.86rem;color:var(--ink-2);margin-top:12px}
+.login{max-width:420px;margin:60px auto;background:var(--card);border-radius:28px;padding:32px;box-shadow:var(--shadow)}
+.login h2{font-size:1.6rem;margin:8px 0 6px}
+.login p{color:var(--ink-2);font-size:.92rem}
+.login label{display:block;font-size:.86rem;font-weight:500;margin:16px 0 6px}
+.login input{width:100%;min-height:48px;border-radius:14px;border:1.5px solid var(--line);background:#fff;padding:0 14px}
+.login .err{color:var(--solo);font-size:.88rem;margin-top:12px;min-height:1.2em}
+footer{padding:30px 0 40px;font-family:var(--mono);font-size:.66rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+@media (max-width:1000px){.kpis{grid-template-columns:repeat(2,1fr)}.two,.half{grid-template-columns:1fr}}
+@media (max-width:560px){.hbar{grid-template-columns:1fr auto}.hbar .lab{grid-column:1/-1}.hbar .t{grid-column:1}.funnel>.hbars>.hbar{grid-template-columns:22px 1fr auto}.funnel>.hbars>.hbar .lab{grid-column:2/-1}.funnel>.hbars>.hbar .t{grid-column:2}.kpi .v{font-size:1.7rem}}
+</style>
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <div><h1>Painel de Insights</h1><div class="sub">Sua casa te representa? · desempenho da experiência</div></div>
+  <span id="modeBadge" class="badge"></span>
+  <span class="spacer"></span>
+  <button class="hbtn" id="logoutBtn" hidden>Sair</button>
+</div></header>
+<main class="wrap" id="app"></main>
+<footer class="wrap">Desenvolvido pelo LED Arquitetura</footer>
+
+<script>
+"use strict";
+/* =======================================================================
+   PAINEL DE INSIGHTS
+   - Modo real: Supabase configurado em config.js. Acesso exige login de
+     um usuário cadastrado na tabela "admins" (políticas RLS no servidor).
+     Nenhuma credencial fica neste código.
+   - Modo demonstração: sem backend. Duas fontes, sempre identificadas e
+     nunca misturadas: (1) dados fictícios gerados; (2) eventos reais
+     registrados apenas neste navegador durante testes.
+   ======================================================================= */
+const CFG = Object.assign({ supabaseUrl:"", supabaseAnonKey:"" }, window.APP_CONFIG||{});
+const LIVE = !!(CFG.supabaseUrl && CFG.supabaseAnonKey);
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[c]));
+const fmt = n => Number(n||0).toLocaleString("pt-BR");
+const pct = (a,b) => b ? a/b*100 : 0;
+const fp = v => v.toLocaleString("pt-BR",{ maximumFractionDigits:1 }) + "%";
+const DAY = 864e5;
+
+const FUNNEL = [
+  ["page_view","Acessaram a página inicial"],["journey_started","Iniciaram a experiência"],["environment_selected","Selecionaram o ambiente"],
+  ["photo_uploaded","Enviaram a fotografia"],["ai_analysis_completed","Visualizaram a interpretação"],["interpretation_reacted","Responderam se o ambiente os representa"],
+  ["questionnaire_completed","Concluíram o questionário"],["diagnosis_generated","Visualizaram o diagnóstico"],["report_viewed","Chegaram ao relatório final"],
+  ["experience_rated","Avaliaram a experiência"],["instagram_clicked","Clicaram no Instagram"]
+];
+const ENV_NAMES = { sala:"Sala de estar", quarto:"Quarto", cozinha:"Cozinha" };
+const BANDS = ["Baixa conexão","Conexão em desenvolvimento","Boa conexão","Alta conexão"];
+const BAND_COLORS = ["#E6EBC6","#BFCB72","#8E9B2E","#5E6B1C"]; // rampa sequencial (uma cor, claro→escuro)
+const DIM_NAMES = { f:"Funcionalidade", a:"Identidade estética", c:"Conforto", p:"Atendimento às prioridades" };
+const NEED_NAMES = { iluminacao:"Melhorar a iluminação", armazenamento:"Aumentar o armazenamento", circulacao:"Melhorar a circulação", conforto:"Ter mais conforto", privacidade:"Mais privacidade", organizacao:"Melhorar a organização", estetica:"Melhorar a estética", espaco:"Aproveitar melhor o espaço", integracao:"Integrar ambientes", personalidade:"Personalizar o ambiente", funcionalidade:"Melhorar a funcionalidade", cor:"Cor e contraste", materiais:"Materiais e texturas", descanso:"Descansar melhor", setorizacao:"Separar trabalho e descanso", acomodacao:"Acomodar visitas", bancada:"Mais bancada na cozinha" };
+const STEP_NAMES = { intro:"Apresentação", env:"Escolha do ambiente", upload:"Envio da foto", analyzing:"Análise visual", reading:"Interpretação", reaction:"Reação", quiz:"Questionário", crossing:"Cruzamento", result:"Termômetro", book:"Book de sugestões", report:"Relatório" };
+const PERIODS = [["today","Hoje"],["7","Últimos 7 dias"],["30","Últimos 30 dias"],["90","Últimos 90 dias"],["all","Todo o período"]];
+
+const state = { period:"30", source: LIVE ? "live" : "demo", events:[], feedback:[], token: sessionStorage.getItem("ins_token") };
+
+/* ---------------- Fontes de dados ---------------- */
+function rng(seed){ return () => { seed |= 0; seed = seed + 0x6D2B79F5 | 0; let t = Math.imul(seed ^ seed >>> 15, 1 | seed); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+function demoData(){
+  const r = rng(20261112), now = Date.now(), ev = [], fb = [];
+  const pick = (arr, w) => { const s = w.reduce((a,b)=>a+b,0); let x = r()*s; for (let i=0;i<arr.length;i++){ x -= w[i]; if (x<=0) return arr[i]; } return arr[arr.length-1]; };
+  const visitors = [];
+  const comments = ["Adorei a leitura da foto, me fez pensar na minha sala de outro jeito.","Poderia ter mais opções de ambientes, como banheiro e varanda.","As sugestões do nível 1 foram muito úteis.","Achei o termômetro muito legal!","Gostaria de ver exemplos de projetos.","Experiência bonita e rápida.","Senti falta de poder enviar mais de uma foto.","Me identifiquei com o perfil. Muito bom!"];
+  const needsPool = ["iluminacao","armazenamento","circulacao","conforto","organizacao","estetica","personalidade","espaco","funcionalidade","descanso","bancada","setorizacao"];
+  for (let i=0;i<1650;i++){
+    const age = Math.pow(r(), 1.12) * 120 * DAY;            // mais acessos recentes
+    let t = now - age;
+    const sid = "demo-s" + i;
+    let vid; if (visitors.length && r() < .18) vid = visitors[Math.floor(r()*visitors.length)]; else { vid = "demo-v" + i; visitors.push(vid); }
+    const envId = pick(["sala","quarto","cozinha"],[46,34,20]);
+    const push = (e, props={}) => { t += (20 + r()*90) * 1000; ev.push({ event:e, session_id:sid, visitor_id:vid, environment:["page_view","journey_started"].includes(e)?null:envId, props, created_at:new Date(t).toISOString() }); };
+    push("page_view");
+    const keep = [ .62, .9, .82, .93, .88, .8, .95, .9, .38, .1 ];
+    const seq = ["journey_started","environment_selected","photo_uploaded","ai_analysis_completed","interpretation_reacted","questionnaire_completed","diagnosis_generated","report_viewed"];
+    let last = "intro", k = 0;
+    for (; k<seq.length; k++){
+      if (r() > keep[k]){ break; }
+      const e = seq[k];
+      if (e === "environment_selected") push(e, { environment:envId });
+      else if (e === "interpretation_reacted") push(e, { reaction: pick(["sim","partes","nao"],[24,52,24]) });
+      else if (e === "diagnosis_generated"){
+        const base = pick([28,48,68,86],[14,34,38,14]), score = Math.max(12, Math.min(95, Math.round(base + (r()-.5)*18)));
+        const band = score<40?BANDS[0]:score<60?BANDS[1]:score<80?BANDS[2]:BANDS[3];
+        const dims = { f:Math.round(score + (r()-.6)*22), a:Math.round(score + (r()-.4)*22), c:Math.round(score + (r()-.5)*20), p:Math.round(score - 8 + (r()-.5)*20) };
+        const pr = []; while (pr.length < 1 + Math.floor(r()*3)){ const n = pick(needsPool,[18,16,9,12,11,9,8,7,6,envId==="quarto"?8:1,envId==="cozinha"?10:0.5,4]); if (!pr.includes(n)) pr.push(n); }
+        push(e, { score, band, dims, priorities: pr.filter(x=>!["descanso","bancada","setorizacao"].includes(x)), needs: pr });
+      }
+      else push(e);
+      last = { journey_started:"env", environment_selected:"upload", photo_uploaded:"analyzing", ai_analysis_completed:"reading", interpretation_reacted:"quiz", questionnaire_completed:"crossing", diagnosis_generated:"result" }[e] || last;
+    }
+    if (k >= 1 && k < seq.length) push("journey_abandoned", { last_step: last });
+    if (k === seq.length){
+      if (r() < keep[8]){ const rating = pick([1,2,3,4,5],[2,4,12,38,44]); push("experience_rated", { rating, has_comment: r() < .22 }); if (ev[ev.length-1].props.has_comment) fb.push({ rating, comment: comments[Math.floor(r()*comments.length)], created_at: ev[ev.length-1].created_at }); }
+      if (r() < .24) push("instagram_clicked");
+    }
+  }
+  return { events: ev.filter(e=>new Date(e.created_at) <= now), feedback: fb };
+}
+function localData(){
+  const get = k => { try { return JSON.parse(localStorage.getItem(k) || "[]"); } catch(e){ return []; } };
+  return { events: get("sctr_local_events"), feedback: get("sctr_local_feedback") };
+}
+async function sb(path, opts={}){
+  const res = await fetch(`${CFG.supabaseUrl.replace(/\/$/,"")}${path}`, { ...opts, headers:{ apikey:CFG.supabaseAnonKey, Authorization:`Bearer ${state.token||CFG.supabaseAnonKey}`, "Content-Type":"application/json", ...(opts.headers||{}) } });
+  if (res.status === 401){ logout(); throw new Error("Sessão expirada. Entre novamente."); }
+  if (!res.ok) throw new Error(`Erro ${res.status} ao consultar a base.`);
+  return res;
+}
+async function fetchAll(table, select, since){
+  const out = []; const size = 1000;
+  for (let from=0; from<200000; from+=size){
+    const q = `/rest/v1/${table}?select=${select}${since?`&created_at=gte.${encodeURIComponent(new Date(since).toISOString())}`:""}&order=created_at.asc`;
+    const res = await sb(q, { headers:{ Range:`${from}-${from+size-1}`, "Range-Unit":"items" } });
+    const rows = await res.json(); out.push(...rows); if (rows.length < size) break;
+  }
+  return out;
+}
+async function liveData(){
+  const since = periodRange(state.period).prevStart;
+  const [events, feedback] = await Promise.all([
+    fetchAll("events","event,session_id,visitor_id,environment,props,created_at", since),
+    fetchAll("feedback","rating,comment,created_at", since)
+  ]);
+  return { events, feedback };
+}
+
+/* ---------------- Períodos e agregação ---------------- */
+function periodRange(p){
+  const now = Date.now();
+  if (p === "all") return { start:null, prevStart:null, prevEnd:null };
+  if (p === "today"){ const d = new Date(); d.setHours(0,0,0,0); const s = d.getTime(); return { start:s, prevStart:s-DAY, prevEnd:s }; }
+  const n = Number(p) * DAY; return { start: now-n, prevStart: now-2*n, prevEnd: now-n };
+}
+function aggregate(events, feedback, from, to){
+  const inR = e => { const t = new Date(e.created_at).getTime(); return (from==null || t>=from) && (to==null || t<to); };
+  const E = events.filter(inR), F = feedback.filter(inR);
+  const sess = {}; E.forEach(e => (sess[e.event] || (sess[e.event] = new Set())).add(e.session_id));
+  const sc = k => sess[k]?.size || 0;
+  const pv = E.filter(e=>e.event==="page_view");
+  const started = sc("journey_started"), done = sc("report_viewed");
+  const ratings = E.filter(e=>e.event==="experience_rated" && Number(e.props?.rating)>=1).map(e=>Number(e.props.rating));
+  const lastBy = ev => { const m = new Map(); E.filter(e=>e.event===ev).forEach(e=>m.set(e.session_id, e)); return [...m.values()]; };
+  const diags = lastBy("diagnosis_generated");
+  const envs = { sala:0, quarto:0, cozinha:0 }; lastBy("environment_selected").forEach(e => { const k = e.props?.environment || e.environment; if (k in envs) envs[k]++; });
+  const bands = BANDS.map(b => diags.filter(d=>d.props?.band===b).length);
+  const dimAvg = {}; Object.keys(DIM_NAMES).forEach(k => { const v = diags.map(d=>Number(d.props?.dims?.[k])).filter(Number.isFinite); dimAvg[k] = v.length ? v.reduce((a,b)=>a+b,0)/v.length : null; });
+  const scores = diags.map(d=>Number(d.props?.score)).filter(Number.isFinite);
+  const needs = {}; diags.forEach(d => (d.props?.needs || d.props?.priorities || []).forEach(n => needs[n] = (needs[n]||0)+1));
+  const abandon = {}; lastBy("journey_abandoned").forEach(e => { if (!sess.report_viewed?.has(e.session_id)){ const s = e.props?.last_step || "—"; abandon[s] = (abandon[s]||0)+1; } });
+  const reactions = { sim:0, partes:0, nao:0 }; lastBy("interpretation_reacted").forEach(e => { if (e.props?.reaction in reactions) reactions[e.props.reaction]++; });
+  return {
+    accesses: pv.length, unique: new Set(pv.map(e=>e.visitor_id).filter(Boolean)).size,
+    started, done, completion: pct(done, started), abandonRate: started ? 100 - pct(done, started) : 0,
+    ratingAvg: ratings.length ? ratings.reduce((a,b)=>a+b,0)/ratings.length : null, ratingCount: ratings.length,
+    ratingDist: [1,2,3,4,5].map(n => ratings.filter(r=>r===n).length),
+    instagram: sc("instagram_clicked"), funnel: FUNNEL.map(([k,l]) => ({ key:k, label:l, n: sc(k) })),
+    envs, bands, dimAvg, scoreAvg: scores.length ? scores.reduce((a,b)=>a+b,0)/scores.length : null, diagCount: diags.length,
+    needs: Object.entries(needs).sort((a,b)=>b[1]-a[1]), abandon: Object.entries(abandon).sort((a,b)=>b[1]-a[1]), reactions,
+    comments: F.filter(f=>f.comment).sort((a,b)=>new Date(b.created_at)-new Date(a.created_at)), E
+  };
+}
+function daily(E, from){
+  const start = new Date(from ?? (E.length ? new Date(E[0].created_at).getTime() : Date.now())).setHours(0,0,0,0);
+  const days = Math.max(1, Math.ceil((Date.now() - start) / DAY));
+  const bucket = days > 120 ? 7 : 1, n = Math.ceil(days / bucket);
+  const rows = Array.from({ length:n }, (_,i) => ({ t: start + i*bucket*DAY, a:0, s:new Set(), c:new Set() }));
+  E.forEach(e => { const i = Math.floor((new Date(e.created_at).getTime() - start) / (bucket*DAY)); const r = rows[i]; if (!r) return;
+    if (e.event==="page_view") r.a++; if (e.event==="journey_started") r.s.add(e.session_id); if (e.event==="report_viewed") r.c.add(e.session_id); });
+  return { bucket, rows: rows.map(r => ({ t:r.t, a:r.a, s:r.s.size, c:r.c.size })) };
+}
+
+/* ---------------- Renderização ---------------- */
+function delta(cur, prev, suffix="", pp=false){
+  if (prev == null || state.period === "all") return `<span class="d">sem período anterior para comparar</span>`;
+  if (!prev && !cur) return `<span class="d">sem variação</span>`;
+  const d = pp ? cur - prev : (prev ? (cur-prev)/prev*100 : 100);
+  const cls = d > 0.05 ? "up" : d < -0.05 ? "down" : "";
+  return `<span class="d ${cls}">${d>0?"▲":d<0?"▼":"="} ${Math.abs(d).toLocaleString("pt-BR",{maximumFractionDigits:1})}${pp?" p.p.":"%"} vs. período anterior</span>`;
+}
+function hbars(items, { color="var(--aco)", total=null, fmtN=v=>fmt(v) } = {}){
+  const max = Math.max(1, ...items.map(i=>i.n));
+  return `<div class="hbars">${items.map(i=>`<div class="hbar" title="${esc(i.label)}: ${fmtN(i.n)}"><span class="lab">${esc(i.label)}</span><span class="t"><span style="width:${i.n/max*100}%;background:${i.color||color}"></span></span><span class="n">${fmtN(i.n)}${total?`<small>${fp(pct(i.n,total))}</small>`:""}</span></div>`).join("")}</div>`;
+}
+function lineChart(series){
+  const { rows, bucket } = series; const W = 760, H = 240, pl = 40, pr = 12, pt = 12, pb = 28;
+  const keys = [["a","Acessos","var(--s1)"],["s","Jornadas iniciadas","var(--s2)"],["c","Jornadas concluídas","var(--s3)"]];
+  const max = Math.max(4, ...rows.flatMap(r=>[r.a,r.s,r.c]));
+  const x = i => pl + (rows.length<=1 ? (W-pl-pr)/2 : i*(W-pl-pr)/(rows.length-1)), y = v => pt + (H-pt-pb)*(1 - v/max);
+  const grid = [0,.5,1].map(f => `<line x1="${pl}" x2="${W-pr}" y1="${y(max*f)}" y2="${y(max*f)}" stroke="#ECE6D6"/><text x="${pl-8}" y="${y(max*f)+4}" text-anchor="end" font-size="10" fill="#7A7C85" font-family="DM Mono">${Math.round(max*f)}</text>`).join("");
+  const lab = i => new Date(rows[i].t).toLocaleDateString("pt-BR",{ day:"2-digit", month:"2-digit" });
+  const xt = rows.length ? [0, Math.floor((rows.length-1)/2), rows.length-1].filter((v,i,a)=>a.indexOf(v)===i).map(i=>`<text x="${x(i)}" y="${H-8}" text-anchor="middle" font-size="10" fill="#7A7C85" font-family="DM Mono">${lab(i)}</text>`).join("") : "";
+  const lines = keys.map(([k,,c]) => `<path d="${rows.map((r,i)=>`${i?"L":"M"}${x(i).toFixed(1)} ${y(r[k]).toFixed(1)}`).join(" ")}" fill="none" stroke="${c}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>`).join("");
+  const lastLabels = rows.length ? keys.map(([k,l,c]) => `<circle cx="${x(rows.length-1)}" cy="${y(rows[rows.length-1][k])}" r="4" fill="${c}" stroke="#FFFDF8" stroke-width="2"/>`).join("") : "";
+  return `<div class="legend">${keys.map(([,l,c])=>`<span><i style="background:${c}"></i>${l}</span>`).join("")}<span style="color:var(--muted)">· ${bucket===7?"por semana":"por dia"}</span></div>
+    <div class="chart" id="lineChart"><svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Acessos, jornadas iniciadas e concluídas ao longo do tempo">${grid}${xt}${lines}${lastLabels}
+      <line id="cross" x1="0" x2="0" y1="${pt}" y2="${H-pb}" stroke="#7A7C85" stroke-dasharray="3 3" opacity="0"/><rect x="${pl}" y="${pt}" width="${W-pl-pr}" height="${H-pt-pb}" fill="transparent" id="hit"/></svg><div class="tip" id="tip"></div></div>
+    <details><summary>Ver como tabela</summary><table><thead><tr><th>${bucket===7?"Semana de":"Dia"}</th><th>Acessos</th><th>Iniciadas</th><th>Concluídas</th></tr></thead><tbody>${rows.slice().reverse().map((r,i)=>`<tr><td>${new Date(r.t).toLocaleDateString("pt-BR")}</td><td>${r.a}</td><td>${r.s}</td><td>${r.c}</td></tr>`).join("")}</tbody></table></details>`;
+}
+function bindLineChart(series){
+  const box = $("#lineChart"); if (!box) return; const svg = box.querySelector("svg"), tip = $("#tip"), cross = $("#cross"); const rows = series.rows; const W = 760, pl = 40, pr = 12;
+  const move = ev => { const rect = svg.getBoundingClientRect(); const sx = (ev.clientX - rect.left) / rect.width * W; const i = Math.max(0, Math.min(rows.length-1, Math.round((sx - pl) / ((W-pl-pr)/Math.max(1,rows.length-1))))); const r = rows[i]; if (!r) return;
+    const xx = pl + (rows.length<=1 ? 0 : i*(W-pl-pr)/(rows.length-1)); cross.setAttribute("x1",xx); cross.setAttribute("x2",xx); cross.setAttribute("opacity",1);
+    tip.innerHTML = `<b>${new Date(r.t).toLocaleDateString("pt-BR")}</b><br>Acessos: ${r.a} · Iniciadas: ${r.s} · Concluídas: ${r.c}`; tip.style.left = (xx/W*100) + "%"; tip.style.top = "30px"; tip.style.opacity = 1; };
+  svg.addEventListener("pointermove", move); svg.addEventListener("pointerleave", () => { tip.style.opacity = 0; cross.setAttribute("opacity",0); });
+}
+
+function render(){
+  const app = $("#app");
+  const badge = $("#modeBadge");
+  if (state.source === "live"){ badge.className = "badge live"; badge.textContent = "Dados reais · Supabase"; }
+  else if (state.source === "local"){ badge.className = "badge local"; badge.textContent = "Teste local · este navegador"; }
+  else { badge.className = "badge demo"; badge.textContent = "Demonstração · dados fictícios"; }
+  if (LIVE && !state.token) return renderLogin();
+  $("#logoutBtn").hidden = !LIVE;
+
+  const { start, prevStart, prevEnd } = periodRange(state.period);
+  const A = aggregate(state.events, state.feedback, start, null);
+  const B = prevStart != null ? aggregate(state.events, state.feedback, prevStart, prevEnd) : null;
+  const series = daily(A.E, start);
+  const f = A.funnel; let drop = null; for (let i=1;i<9;i++){ const lost = f[i-1].n - f[i].n; if (f[i-1].n && (!drop || lost > drop.lost)) drop = { i, lost, rate: pct(lost, f[i-1].n) }; }
+  const envTotal = Object.values(A.envs).reduce((a,b)=>a+b,0), bandTotal = A.bands.reduce((a,b)=>a+b,0);
+
+  app.innerHTML = `
+    ${state.source==="demo" ? `<div class="banner"><span>⚠</span><span><b>Modo demonstração.</b> Nenhum backend de métricas está configurado. Os números abaixo são <b>fictícios</b>, gerados apenas para testar gráficos, funil e exportação — <b>não representam acessos reais</b>. Configure o Supabase em <code>config.js</code> para ver dados reais.</span></div>` : ""}
+    ${state.source==="local" ? `<div class="banner" style="background:#E6EBC6;color:#3d460f"><span>ⓘ</span><span><b>Eventos locais de teste.</b> São eventos reais, mas registrados apenas neste navegador enquanto não há backend. Servem para validar o funcionamento — não representam o público do site.</span></div>` : ""}
+    <div class="controls">
+      ${!LIVE ? `<div class="seg" role="group" aria-label="Fonte de dados"><button data-src="demo" aria-pressed="${state.source==="demo"}">Dados fictícios</button><button data-src="local" aria-pressed="${state.source==="local"}">Eventos deste navegador</button></div>` : ""}
+      <div class="seg" role="group" aria-label="Período">${PERIODS.map(([k,l])=>`<button data-period="${k}" aria-pressed="${state.period===k}">${l}</button>`).join("")}</div>
+      <span class="spacer" style="flex:1"></span>
+      <button class="btn" id="csvBtn">⇩ Exportar CSV</button>
+    </div>
+
+    <section class="grid kpis">
+      <div class="kpi"><span class="l">Acessos totais</span><span class="v">${fmt(A.accesses)}</span>${delta(A.accesses, B?.accesses)}</div>
+      <div class="kpi"><span class="l">Usuários únicos (estimados)</span><span class="v">${fmt(A.unique)}</span>${delta(A.unique, B?.unique)}</div>
+      <div class="kpi"><span class="l">Jornadas iniciadas</span><span class="v">${fmt(A.started)}</span>${delta(A.started, B?.started)}</div>
+      <div class="kpi"><span class="l">Jornadas concluídas</span><span class="v">${fmt(A.done)}</span>${delta(A.done, B?.done)}</div>
+      <div class="kpi hl"><span class="l">Taxa de conclusão</span><span class="v">${fp(A.completion)}</span>${delta(A.completion, B?.completion, "", true)}</div>
+      <div class="kpi"><span class="l">Taxa de abandono</span><span class="v">${fp(A.abandonRate)}</span>${delta(A.abandonRate, B?.abandonRate, "", true)}</div>
+      <div class="kpi"><span class="l">Avaliação média</span><span class="v">${A.ratingAvg!=null ? A.ratingAvg.toLocaleString("pt-BR",{maximumFractionDigits:2})+" ★" : "—"}</span><span class="d">${fmt(A.ratingCount)} avaliações</span></div>
+      <div class="kpi"><span class="l">Cliques no Instagram</span><span class="v">${fmt(A.instagram)}</span>${delta(A.instagram, B?.instagram)}</div>
+    </section>
+
+    <section class="grid two section">
+      <div class="card"><h2>Evolução no período</h2><p class="desc">Acessos à página inicial, jornadas iniciadas e jornadas que chegaram ao relatório.</p>${A.E.length ? lineChart(series) : `<p class="empty">Ainda não há eventos neste período.</p>`}</div>
+      <div class="card"><h2>Ambientes analisados</h2><p class="desc">Qual ambiente as pessoas escolhem — números absolutos e percentuais.</p>
+        ${envTotal ? hbars(Object.entries(A.envs).map(([k,n])=>({ label:ENV_NAMES[k], n })).sort((a,b)=>b.n-a.n), { total:envTotal }) : `<p class="empty">Sem escolhas de ambiente neste período.</p>`}
+        <h2 style="margin-top:26px">Reação à leitura</h2><p class="desc">“A casa te representa?”</p>
+        ${hbars([["sim","Sim, me representa"],["partes","Em partes"],["nao","Não me representa"]].map(([k,l])=>({ label:l, n:A.reactions[k] })), { total:Object.values(A.reactions).reduce((a,b)=>a+b,0)||null, color:"var(--urbano)" })}</div>
+    </section>
+
+    <section class="card section funnel"><h2>Funil da experiência</h2><p class="desc">Sessões que chegaram a cada etapa. A etapa com maior perda está destacada.</p>
+      <div class="hbars">${f.map((s,i)=>`<div class="hbar ${drop && drop.i===i?"drop":""}" title="${esc(s.label)}: ${fmt(s.n)}"><span class="idx">${String(i+1).padStart(2,"0")}</span><span class="lab">${esc(s.label)}</span><span class="t"><span style="width:${pct(s.n, Math.max(1,f[0].n))}%;background:${i>=8?"var(--viva-deep)":"var(--aco)"}"></span></span><span class="n">${fmt(s.n)}<small>${i?fp(pct(s.n,f[0].n)):"100%"}</small><span class="conv">${i?`${fp(pct(s.n,f[i-1].n))} da etapa anterior`:"base"}</span></span></div>`).join("")}</div>
+      ${drop && drop.lost > 0 ? `<div class="drop-note"><b>Maior perda:</b> entre “${esc(f[drop.i-1].label)}” e “${esc(f[drop.i].label)}” — ${fmt(drop.lost)} sessões (${fp(drop.rate)}) não avançaram.</div>` : ""}
+      ${A.abandon.length ? `<details open><summary>Onde as jornadas foram abandonadas (última etapa registrada)</summary><div style="margin-top:12px">${hbars(A.abandon.slice(0,8).map(([k,n])=>({ label:STEP_NAMES[k]||k, n })), { color:"var(--solo)" })}</div></details>` : ""}
+    </section>
+
+    <section class="grid half section">
+      <div class="card"><h2>Resultados de compatibilidade</h2><p class="desc">${fmt(A.diagCount)} diagnósticos${A.scoreAvg!=null?` · média geral de <b>${Math.round(A.scoreAvg)}%</b>`:""}.</p>
+        ${bandTotal ? `<div class="stack" role="img" aria-label="Distribuição por faixa">${A.bands.map((n,i)=> n ? `<div style="flex:${n};background:${BAND_COLORS[i]};color:${i>=2?"#fff":"#283145"}" title="${BANDS[i]}: ${n}">${fp(pct(n,bandTotal))}</div>` : "").join("")}</div>
+          <div style="margin-top:14px">${hbars(BANDS.map((b,i)=>({ label:b, n:A.bands[i], color:BAND_COLORS[i] })), { total:bandTotal })}</div>` : `<p class="empty">Sem diagnósticos neste período.</p>`}
+        <h2 style="margin-top:26px">Médias por dimensão</h2><p class="desc">Média das pontuações (0–100%).</p>
+        ${A.diagCount ? hbars(Object.entries(DIM_NAMES).map(([k,l])=>({ label:l, n: Math.round(A.dimAvg[k]||0) })), { fmtN:v=>v+"%", color:"var(--solo)" }) : `<p class="empty">—</p>`}
+      </div>
+      <div class="card"><h2>Principais necessidades</h2><p class="desc">Necessidades e prioridades mais presentes nos diagnósticos — pistas de demandas recorrentes e oportunidades de serviço.</p>
+        ${A.needs.length ? hbars(A.needs.slice(0,12).map(([k,n])=>({ label:NEED_NAMES[k]||k, n })), { total:A.diagCount, color:"var(--viva-deep)" }) : `<p class="empty">Sem dados neste período.</p>`}
+      </div>
+    </section>
+
+    <section class="grid half section">
+      <div class="card"><h2>Avaliação da experiência</h2>
+        <div class="stars-row"><span class="big">${A.ratingAvg!=null?A.ratingAvg.toLocaleString("pt-BR",{maximumFractionDigits:2}):"—"}</span><span>★ média · ${fmt(A.ratingCount)} avaliações</span></div>
+        ${hbars([5,4,3,2,1].map(n=>({ label:`${n} estrela${n>1?"s":""}`, n:A.ratingDist[n-1] })), { total:A.ratingCount||null, color:"var(--tijolo)" })}</div>
+      <div class="card"><h2>Comentários recebidos</h2><p class="desc">${fmt(A.comments.length)} comentários no período.</p>
+        ${A.comments.length ? `<div class="comments">${A.comments.slice(0,60).map(c=>`<div><small>${"★".repeat(c.rating||0)} · ${new Date(c.created_at).toLocaleDateString("pt-BR")}</small>${esc(c.comment)}</div>`).join("")}</div>` : `<p class="empty">Nenhum comentário neste período.</p>`}</div>
+    </section>`;
+  bindLineChart(series);
+  app.querySelectorAll("[data-period]").forEach(b => b.onclick = async () => { state.period = b.dataset.period; if (state.source==="live") await load(); else render(); });
+  app.querySelectorAll("[data-src]").forEach(b => b.onclick = () => { state.source = b.dataset.src; load(); });
+  $("#csvBtn").onclick = () => exportCSV(A, series);
+}
+
+function exportCSV(A, series){
+  const label = PERIODS.find(p=>p[0]===state.period)[1];
+  const src = { demo:"DEMONSTRACAO - dados ficticios", local:"Teste local (este navegador)", live:"Dados reais (Supabase)" }[state.source];
+  const L = [["Painel de Insights - Sua casa te representa?"],["Fonte", src],["Periodo", label],["Gerado em", new Date().toLocaleString("pt-BR")],[],
+    ["Indicador","Valor"],["Acessos totais",A.accesses],["Usuarios unicos (estimados)",A.unique],["Jornadas iniciadas",A.started],["Jornadas concluidas",A.done],
+    ["Taxa de conclusao (%)",A.completion.toFixed(1)],["Taxa de abandono (%)",A.abandonRate.toFixed(1)],["Avaliacao media",A.ratingAvg!=null?A.ratingAvg.toFixed(2):""],["Quantidade de avaliacoes",A.ratingCount],["Cliques no Instagram",A.instagram],[],
+    ["Funil - etapa","Sessoes","% do inicio"], ...A.funnel.map(s=>[s.label, s.n, pct(s.n, A.funnel[0].n).toFixed(1)]),[],
+    ["Ambiente","Quantidade"], ...Object.entries(A.envs).map(([k,n])=>[ENV_NAMES[k],n]),[],
+    ["Faixa de conexao","Quantidade"], ...BANDS.map((b,i)=>[b,A.bands[i]]),[],
+    ["Dimensao","Media (%)"], ...Object.entries(DIM_NAMES).map(([k,l])=>[l, A.dimAvg[k]!=null?A.dimAvg[k].toFixed(1):""]),[],
+    ["Necessidade","Diagnosticos"], ...A.needs.map(([k,n])=>[NEED_NAMES[k]||k,n]),[],
+    ["Estrelas","Quantidade"], ...[1,2,3,4,5].map(n=>[n, A.ratingDist[n-1]]),[],
+    [series.bucket===7?"Semana de":"Dia","Acessos","Iniciadas","Concluidas"], ...series.rows.map(r=>[new Date(r.t).toISOString().slice(0,10), r.a, r.s, r.c])];
+  const csv = "﻿" + L.map(r => r.map(c => { const s = String(c ?? ""); return /[;"\n]/.test(s) ? `"${s.replace(/"/g,'""')}"` : s; }).join(";")).join("\n");
+  const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([csv], { type:"text/csv;charset=utf-8" }));
+  a.download = `insights-${state.source}-${state.period}-${new Date().toISOString().slice(0,10)}.csv`; a.click(); setTimeout(()=>URL.revokeObjectURL(a.href), 2000);
+}
+
+/* ---------------- Autenticação (modo real) ---------------- */
+function renderLogin(msg=""){
+  $("#logoutBtn").hidden = true;
+  $("#app").innerHTML = `<form class="login" id="loginForm"><span class="mono" style="color:var(--solo)">Acesso restrito</span><h2>Entrar no painel</h2>
+    <p>Use o e-mail e a senha de um administrador cadastrado no Supabase. As credenciais não ficam armazenadas neste código.</p>
+    <label for="em">E-mail</label><input id="em" type="email" autocomplete="username" required>
+    <label for="pw">Senha</label><input id="pw" type="password" autocomplete="current-password" required>
+    <div class="err" id="err">${esc(msg)}</div><button class="btn primary" style="margin-top:10px;width:100%;justify-content:center">Entrar</button></form>`;
+  $("#loginForm").onsubmit = async e => {
+    e.preventDefault(); $("#err").textContent = "Entrando…";
+    try {
+      const res = await fetch(`${CFG.supabaseUrl.replace(/\/$/,"")}/auth/v1/token?grant_type=password`, { method:"POST", headers:{ apikey:CFG.supabaseAnonKey, "Content-Type":"application/json" }, body:JSON.stringify({ email:$("#em").value, password:$("#pw").value }) });
+      const j = await res.json(); if (!res.ok || !j.access_token) throw new Error("E-mail ou senha inválidos.");
+      state.token = j.access_token; sessionStorage.setItem("ins_token", j.access_token); sessionStorage.setItem("ins_uid", j.user?.id || "");
+      const adm = await (await sb(`/rest/v1/admins?select=user_id&user_id=eq.${encodeURIComponent(j.user?.id||"")}`)).json();
+      if (!adm.length){ logout(); return renderLogin("Este usuário não tem permissão de administrador."); }
+      load();
+    } catch(err){ $("#err").textContent = err.message; }
+  };
+}
+function logout(){ state.token = null; sessionStorage.removeItem("ins_token"); sessionStorage.removeItem("ins_uid"); }
+$("#logoutBtn").onclick = () => { logout(); render(); };
+
+async function load(){
+  try {
+    if (state.source === "live"){ if (!state.token) return render(); $("#app").innerHTML = `<p class="empty" style="padding:40px 0">Carregando dados…</p>`; Object.assign(state, await liveData()); }
+    else if (state.source === "local") Object.assign(state, localData());
+    else Object.assign(state, demoData());
+    render();
+  } catch(e){
+    if (!state.token) return renderLogin(e.message);
+    $("#app").innerHTML = `<div class="banner" style="background:#F1DCCF;color:#6b2e10">Não foi possível carregar as métricas: ${esc(e.message)}</div>`;
+  }
+}
+load();
+</script>
+</body>
+</html>

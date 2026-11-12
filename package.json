@@ -1,0 +1,11 @@
+{
+  "name": "sua-casa-te-representa",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Experiência interativa “Sua casa te representa?” + backend de IA (serverless) e Painel de Insights.",
+  "type": "module",
+  "engines": { "node": ">=18" },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^1.8.0"
+  }
+}
