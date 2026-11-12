@@ -3,8 +3,17 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Sua casa te representa?</title>
-<meta name="description" content="Uma experiência interativa para descobrir se o ambiente onde você vive representa quem você é e como gostaria de viver.">
+<title>Sua casa te representa? | Por LED Arquitetura</title>
+<meta name="description" content="Toda casa conta uma história. Qual história a sua casa conta? · Por LED Arquitetura">
+<!-- Prévia ao compartilhar (WhatsApp, Instagram, Facebook, LinkedIn) -->
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Sua casa te representa? · Por LED Arquitetura">
+<meta property="og:title" content="Sua casa te representa? | Por LED Arquitetura">
+<meta property="og:description" content="Toda casa conta uma história. Qual história a sua casa conta?">
+<meta property="og:locale" content="pt_BR">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Sua casa te representa? | Por LED Arquitetura">
+<meta name="twitter:description" content="Toda casa conta uma história. Qual história a sua casa conta?">
 <meta name="theme-color" content="#F4F0E6">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -145,6 +154,9 @@ main#stage{flex:1;position:relative}
 .hero h1 .q{color:var(--solo)}
 .hero h1 .ul{position:relative;white-space:nowrap}
 .hero h1 .ul svg{position:absolute;left:-2%;bottom:-.12em;width:104%;height:.32em;overflow:visible}
+.hero .byline{display:inline-flex;align-items:center;gap:10px;margin:-6px 0 22px;font-family:var(--f-mono);font-size:.82rem;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-2)}
+.hero .byline::before{content:"";width:28px;height:2px;border-radius:2px;background:var(--solo)}
+.hero .byline b{font-weight:500;color:var(--solo)}
 .hero .sub{font-size:clamp(1.2rem,2.2vw,1.55rem);font-weight:500;letter-spacing:-.015em;margin-bottom:12px}
 .hero .support{color:var(--ink-2);max-width:500px;font-size:1.05rem;margin-bottom:30px}
 .hero-meta{display:flex;flex-wrap:wrap;gap:18px;margin-top:26px;color:var(--muted);font-size:.86rem}
@@ -655,7 +667,7 @@ main#stage{flex:1;position:relative}
 /* ---------------------------------------------------------------------
    A. CONFIGURAÇÃO E ESTADO
    --------------------------------------------------------------------- */
-const CFG = Object.assign({ aiEndpoint:"", supabaseUrl:"", supabaseAnonKey:"", instagramUrl:"https://www.instagram.com/led_arquitetura?rpxt=NzNzMTl1c3NuaGw5", images:{} }, window.APP_CONFIG || {});
+const CFG = Object.assign({ aiEndpoint:"", supabaseUrl:"", supabaseAnonKey:"", instagramUrl:"https://www.instagram.com/led_arquitetura?obrf=MWlqdjNucTFkajE3ag%3D%3D&utm_source=qr", images:{} }, window.APP_CONFIG || {});
 CFG.images = CFG.images || {};
 /* O modo de IA começa em "demo" e só passa a "live" depois que o backend
    confirma (GET no endpoint) que está publicado e com a chave configurada.
@@ -1760,7 +1772,8 @@ intro(){
       <div class="stagger">
         <span class="eyebrow">Uma experiência de descoberta · cerca de 6 minutos</span>
         <h1>Sua casa te <span class="ul">representa<svg viewBox="0 0 300 30" preserveAspectRatio="none" aria-hidden="true"><path d="M4 22C60 6 160 2 296 18" fill="none" stroke="#E9B349" stroke-width="9" stroke-linecap="round"/></svg></span><span class="q">?</span></h1>
-        <p class="sub">Sua casa conta uma história. Será que ela conta a sua?</p>
+        <p class="byline">Por <b>LED Arquitetura</b></p>
+        <p class="sub">Toda casa conta uma história. Qual história a sua casa conta?</p>
         <p class="support">Descubra o que seu ambiente revela sobre sua relação com o espaço e se ele acompanha a maneira como você realmente gosta de viver.</p>
         <div>${nextBtn("Começar minha descoberta","start",false,"")}</div>
         <div class="hero-meta">

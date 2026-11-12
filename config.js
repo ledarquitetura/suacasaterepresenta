@@ -21,7 +21,7 @@ window.APP_CONFIG = {
   aiEndpoint: "/api/analyze", // na Vercel funciona sozinho; aberto no computador, vira demonstração
   supabaseUrl: "",         // ex.: "https://abcdefgh.supabase.co"
   supabaseAnonKey: "",     // chave "anon public" do Supabase
-  instagramUrl: "https://www.instagram.com/led_arquitetura?rpxt=NzNzMTl1c3NuaGw5",
+  instagramUrl: "https://www.instagram.com/led_arquitetura?obrf=MWlqdjNucTFkajE3ag%3D%3D&utm_source=qr",
 
   /* Fotografias opcionais. Se preenchidas, substituem as ilustrações
      geradas pelo site (use imagens próprias ou licenciadas). */
